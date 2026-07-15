@@ -1,0 +1,173 @@
+==============================================================================
+sql/01_data_quality_checks.sql
+==============================================================================
+
+--- SELECT 'business_units' AS table_name, COUNT(*) AS rows FROM business_units ...
+table_name | rows
+business_units | 4
+categories | 10
+suppliers | 109
+items | 118
+contracts | 20
+po_lines | 13199
+
+--- SELECT COUNT(*) AS lines_with_unknown_supplier FROM po_lines p LEFT JOIN su ...
+lines_with_unknown_supplier
+0
+
+--- SELECT SUM(CASE WHEN quantity <= 0 THEN 1 ELSE 0 END) AS bad_quantity, SUM( ...
+bad_quantity | bad_price
+0 | 0
+
+--- SELECT COUNT(*) AS category_mismatches FROM po_lines p JOIN items i ON i.it ...
+category_mismatches
+0
+
+--- SELECT MIN(po_date) AS first_po, MAX(po_date) AS last_po FROM po_lines ...
+first_po | last_po
+2024-07-01 | 2026-06-28
+
+==============================================================================
+sql/02_spend_overview.sql
+==============================================================================
+
+--- SELECT ROUND(SUM(quantity * unit_price) / 1e6, 2) AS total_spend_eur_m, COU ...
+total_spend_eur_m | po_lines | active_suppliers | purchase_orders
+92.49 | 13199 | 109 | 4400
+
+--- SELECT c.category_name, ROUND(SUM(p.quantity * p.unit_price) / 1e6, 2) AS s ...
+category_name | spend_eur_m | pct_of_total
+Marketing Services | 24.95 | 27.0
+Professional Services | 19.94 | 21.6
+Facilities Services | 13.38 | 14.5
+Logistics Services | 9.52 | 10.3
+IT Hardware | 6.55 | 7.1
+Software & SaaS | 6.35 | 6.9
+Travel | 5.02 | 5.4
+MRO & Maintenance | 4.15 | 4.5
+Packaging | 1.49 | 1.6
+Office Supplies | 1.15 | 1.2
+
+--- SELECT b.bu_name, ROUND(SUM(p.quantity * p.unit_price) / 1e6, 2) AS spend_e ...
+bu_name | spend_eur_m | suppliers_used
+Central Functions | 28.18 | 97
+Operations South | 24.48 | 108
+Operations North | 22.23 | 105
+Digital & Tech | 17.61 | 104
+
+--- SELECT strftime('%Y-%m', po_date) AS month, ROUND(SUM(quantity * unit_price ...
+month | spend_eur_k
+2024-07 | 3052.0
+2024-08 | 4009.0
+2024-09 | 3460.0
+2024-10 | 4895.0
+2024-11 | 4529.0
+2024-12 | 3166.0
+2025-01 | 4004.0
+2025-02 | 3136.0
+2025-03 | 4261.0
+2025-04 | 3105.0
+2025-05 | 3442.0
+2025-06 | 4035.0
+2025-07 | 3681.0
+2025-08 | 3666.0
+2025-09 | 3350.0
+2025-10 | 4994.0
+... (24 rows total)
+
+==============================================================================
+sql/03_supplier_concentration.sql
+==============================================================================
+
+--- WITH supplier_spend AS ( SELECT s.supplier_name, SUM(p.quantity * p.unit_pr ...
+supplier_name | spend_eur_m | pct_of_total | cumulative_pct
+Nord Partners | 14.86 | 16.1 | 16.1
+Delta Media | 9.72 | 10.5 | 26.6
+Linden GmbH | 7.59 | 8.2 | 34.8
+Nova Works | 7.12 | 7.7 | 42.5
+Falcon Consulting | 6.13 | 6.6 | 49.1
+Orbit Works | 4.86 | 5.3 | 54.4
+Racoon Office | 4.03 | 4.4 | 58.7
+Spree Partners | 3.62 | 3.9 | 62.6
+Nova Partners | 3.41 | 3.7 | 66.3
+Metro Works | 2.9 | 3.1 | 69.5
+Cedar Works | 2.69 | 2.9 | 72.4
+Hanse Media | 2.43 | 2.6 | 75.0
+Isar Tech | 1.97 | 2.1 | 77.1
+Core Services | 1.53 | 1.7 | 78.8
+Baltic Partners | 1.47 | 1.6 | 80.4
+
+--- WITH ranked AS ( SELECT SUM(p.quantity * p.unit_price) AS spend, SUM(SUM(p. ...
+suppliers_for_80_pct | total_active_suppliers | pct_of_supplier_base
+14 | 109 | 12.8
+
+--- WITH ranked AS ( SELECT s.supplier_name, SUM(p.quantity * p.unit_price) AS  ...
+abc_class | suppliers | spend_eur_m
+A (top 80% of spend) | 14 | 72.86
+B (next 15%) | 34 | 14.85
+C (tail 5%) | 61 | 4.79
+
+==============================================================================
+sql/04_price_variance.sql
+==============================================================================
+
+--- SELECT i.item_name, c.category_name, COUNT(*) AS times_bought, ROUND(MIN(p. ...
+item_name | category_name | times_bought | best_price | worst_price | spread_pct
+IT Hardware item 05 | IT Hardware | 137 | 1561.67 | 2136.65 | 36.8
+IT Hardware item 01 | IT Hardware | 119 | 1390.45 | 1897.3 | 36.5
+IT Hardware item 03 | IT Hardware | 140 | 1419.81 | 1932.6 | 36.1
+IT Hardware item 09 | IT Hardware | 172 | 337.44 | 458.23 | 35.8
+IT Hardware item 02 | IT Hardware | 155 | 357.62 | 485.33 | 35.7
+IT Hardware item 06 | IT Hardware | 153 | 1456.23 | 1966.12 | 35.0
+Facilities Services item 05 | Facilities Services | 90 | 798.26 | 1068.66 | 33.9
+Professional Services item 04 | Professional Services | 63 | 10773.69 | 14391.44 | 33.6
+IT Hardware item 10 | IT Hardware | 151 | 697.13 | 928.29 | 33.2
+IT Hardware item 07 | IT Hardware | 146 | 363.04 | 482.99 | 33.0
+Facilities Services item 04 | Facilities Services | 101 | 3973.05 | 5280.82 | 32.9
+Professional Services item 12 | Professional Services | 66 | 9552.5 | 12662.8 | 32.6
+Professional Services item 02 | Professional Services | 72 | 10557.11 | 13996.87 | 32.6
+Facilities Services item 01 | Facilities Services | 92 | 4895.18 | 6484.66 | 32.5
+Travel item 10 | Travel | 138 | 147.47 | 194.05 | 31.6
+
+--- WITH best AS ( SELECT item_id, MIN(unit_price) AS best_price FROM po_lines  ...
+actual_spend_eur_m | best_price_spend_eur_m | savings_potential_eur_m | savings_pct
+92.49 | 86.81 | 5.68 | 6.1
+
+==============================================================================
+sql/05_maverick_spend.sql
+==============================================================================
+
+--- SELECT b.bu_name, ROUND(SUM(p.quantity * p.unit_price) / 1e6, 2) AS spend_e ...
+bu_name | spend_eur_m | maverick_eur_m | maverick_pct
+Operations South | 24.48 | 5.79 | 23.7
+Digital & Tech | 17.61 | 2.92 | 16.6
+Operations North | 22.23 | 3.17 | 14.3
+Central Functions | 28.18 | 3.33 | 11.8
+
+--- WITH labeled AS ( SELECT p.item_id, p.quantity, p.unit_price, CASE WHEN ct. ...
+avg_off_contract_premium_pct | est_annualizable_leakage_eur_k
+8.4 | 1211.0
+
+==============================================================================
+sql/06_tail_spend.sql
+==============================================================================
+
+--- WITH supplier_cat AS ( SELECT p.category_id, p.supplier_id, SUM(p.quantity  ...
+category_name | suppliers_total | tail_suppliers | tail_spend_eur_k
+MRO & Maintenance | 18 | 16 | 534.0
+Office Supplies | 16 | 14 | 158.0
+Packaging | 7 | 5 | 184.0
+Marketing Services | 20 | 3 | 185.0
+Travel | 6 | 0 | 0.0
+Software & SaaS | 8 | 0 | 0.0
+Professional Services | 11 | 0 | 0.0
+Logistics Services | 8 | 0 | 0.0
+IT Hardware | 7 | 0 | 0.0
+Facilities Services | 8 | 0 | 0.0
+
+--- WITH supplier_cat AS ( SELECT p.category_id, p.supplier_id, SUM(p.quantity  ...
+category_name | suppliers_to_exit | spend_to_move_eur_k | est_savings_eur_k
+MRO & Maintenance | 16 | 534.0 | 27.0
+Packaging | 5 | 184.0 | 9.0
+Office Supplies | 14 | 158.0 | 8.0
+
