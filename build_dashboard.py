@@ -4,7 +4,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.chart import BarChart, LineChart, Reference
 
-conn = sqlite3.connect("../data/spend.db")
+conn = sqlite3.connect("spend.db")
 cur = conn.cursor()
 
 rows = cur.execute("""

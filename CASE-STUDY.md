@@ -52,7 +52,7 @@ I followed a standard analytics workflow — **Ask → Prepare → Process → A
 
 ### 3.1 Where the money goes
 
-![Spend by category](assets/spend-by-category.png)
+![Spend by category](spend-by-category.png)
 
 Spend is heavily weighted to a few categories. **Marketing Services (27%), Professional Services (22%) and Facilities (14%) together account for almost two-thirds of the €92.5M base.**
 
@@ -60,7 +60,7 @@ A recurring **October spike** — roughly €5.0M against a €3.4M baseline mon
 
 ### 3.2 Supplier concentration cuts both ways
 
-![Supplier Pareto curve](assets/pareto-suppliers.png)
+![Supplier Pareto curve](pareto-suppliers.png)
 
 **14 suppliers — 13% of a 109-supplier base — carry 80% of spend.** That concentration is leverage at the negotiating table, but it is also risk: the single largest supplier alone represents **16% of total spend**.
 
@@ -76,7 +76,7 @@ An ABC view makes the tail visible:
 
 ### 3.3 Price variance is the biggest prize — and a reframe
 
-![Price variance: euros vs percentage](assets/price-variance-reframe.png)
+![Price variance: euros vs percentage](price-variance-reframe.png)
 
 The same catalogue items are bought at very different unit prices across business units and suppliers. Repricing all volume to each item's best observed price would free **€5.68M (6.1% of spend)** in theory.
 
@@ -94,7 +94,7 @@ IT Hardware shows the worst discipline *by percentage* — spreads of 33–37% b
 
 ### 3.4 Maverick spend is a process problem with a name
 
-![Maverick spend by business unit](assets/maverick-by-bu.png)
+![Maverick spend by business unit](maverick-by-bu.png)
 
 **16.5% of network spend — €15.2M over the period — is placed off-contract.** It is not evenly spread: Operations South runs at **23.7%** off-contract versus 11.8% at Central Functions.
 
@@ -170,4 +170,4 @@ A synthetic SQLite spend database (6 tables, line-item grain) with a companion E
 
 Full query set, raw outputs, and the reproducible data generator are in this repository. See **[STUDY-GUIDE.md](STUDY-GUIDE.md)** for a field-by-field, query-by-query walkthrough.
 
-**Also in this repo:** the same case study as a formatted [Word report](deliverables/) and an [11-slide executive deck](deliverables/) with speaker notes.
+**Also in this repo:** the same case study as a formatted [Word report]() and an [11-slide executive deck]() with speaker notes.

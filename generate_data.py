@@ -55,7 +55,7 @@ COUNTRIES = ["DE", "DE", "DE", "DE", "NL", "PL", "AT", "FR", "CZ", "GB"]
 def main():
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
-    cur.executescript(open("../sql/00_schema.sql").read())
+    cur.executescript(open("00_schema.sql").read())
 
     for bu in BUS:
         cur.execute("INSERT INTO business_units VALUES (?,?,?)", bu)
